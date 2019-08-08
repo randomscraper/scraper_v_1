@@ -1,9 +1,6 @@
 from bs4 import BeautifulSoup as BS
 import requests
 import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
 import time
 
 def get_page_source_code(url):
@@ -35,13 +32,7 @@ def read_excel_files():
     #     print(soup.select(".summary-datapoint"))
     
 
-def get_data():
-    options = Options()
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--ignore-ssl-errors')
-    options.headless = False
-    driver = webdriver.Chrome(chrome_options=options)
-            
+def get_data():            
     df = pd.read_csv("DVTDeedExport_07312019_114441_TX.csv")
     addresses = df["Address"]
     # cities = df['City']
