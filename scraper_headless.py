@@ -2,9 +2,10 @@ from bs4 import BeautifulSoup as BS
 import requests
 import pandas as pd
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
 import time
+import sys
+
+sys.path.insert(0,'/usr/lib/chromium-browser/chromedriver')
 
 def get_page_source_code(url):
 
@@ -36,12 +37,11 @@ def read_excel_files():
     
 
 def get_data():
-    options = Options()
-    options.add_argument('--ignore-certificate-errors')
-    options.add_argument('--ignore-ssl-errors')
-    options.headless = False
-    driver = webdriver.Chrome(chrome_options=options)
-            
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    wd = webdriver.Chrome('chromedriver',options=options)
     df = pd.read_csv("DVTDeedExport_07312019_114441_TX.csv")
     addresses = df["Address"]
     # cities = df['City']
@@ -54,26 +54,26 @@ def get_data():
     
     for address, state in zip(addresses, states):
         base_url = "https://www.redfin.com/"
-        driver.get(base_url)
+        wd.get(base_url)
 
-        search_input_field = driver.find_element_by_xpath(
+        search_input_field = wd.find_element_by_xpath(
             '//*[@id="search-box-input"]')
         search_input_field.clear()
         # search_input_field.send_keys("21729 NE COUCH CT")
         search_input_field.send_keys(f"{address} {state}")
         time.sleep(5)
-        search_btn = driver.find_element_by_xpath(
+        search_btn = wd.find_element_by_xpath(
             '//*[@id="tabContentId0"]/div/div/form/div[1]/button')
         print(search_btn)
         search_btn.click()
         time.sleep(5)
         try:
 
-            year_built = driver.find_element_by_xpath(
+            year_built = wd.find_element_by_xpath(
                 '//*[@id="overview-scroll"]/div/div/div[2]/div[2]/div/div/span[2]/span[2]')
-            description = driver.find_element_by_xpath(
+            description = wd.find_element_by_xpath(
                 '//*[@id="marketing-remarks-scroll"]/p/span')
-            price = driver.find_element_by_xpath(
+            price = wd.find_element_by_xpath(
                 '//*[@id="redfin-estimate"]/div/div[3]/div[1]')
 
             prices.append(price.text)
@@ -97,7 +97,7 @@ def get_data():
     df["Year_built"] = years_built
 
     df.to_csv("DVTDeedExport_07312019_114441_TX_New.csv")
-    driver.quit()
+    wd.quit()
 
 
 get_data()
